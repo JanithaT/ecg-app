@@ -22,7 +22,7 @@ class _UpdatePatientDataState extends State<UpdatePatientData> {
   @override
   void initState() {
     super.initState();
-    dbRef = FirebaseDatabase.instance.ref().child('patients');
+    dbRef = FirebaseDatabase.instance.ref().child('Patients');
     getpatientData();
   }
  
@@ -102,13 +102,13 @@ class _UpdatePatientDataState extends State<UpdatePatientData> {
               MaterialButton(
                 onPressed: () {
  
-                  Map<String, String> patients = {
+                  Map<String, String> Patients = {
                     'name': patientNameController.text,
                     'age': patientAgeController.text,
                     'mobile': patientMobileController.text
                   };
  
-                  dbRef.child(widget.patientKey).update(patients)
+                  dbRef.child(widget.patientKey).update(Patients)
                   .then((value) => {
                      Navigator.pop(context) 
                   });
