@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test_application_1/page/ecg_graph.dart';
+import 'package:flutter_test_application_1/page/patients/ecg/real_time_ecg_graph.dart';
 import 'package:flutter_test_application_1/page/my_home_page.dart.dart';
 import 'package:flutter_test_application_1/page/patients/fetch_patient_data.dart';
 import 'package:flutter_test_application_1/page/patients/insert_patient_data.dart';

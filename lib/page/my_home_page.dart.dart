@@ -9,7 +9,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import '../widget/menu_card.dart';
-import 'ecg_graph.dart';
+import 'patients/ecg/real_time_ecg_graph.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -22,6 +22,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -66,19 +67,41 @@ class _MyHomePageState extends State<MyHomePage> {
               width: 20,
             ),
 
-             Row(
+            const Row(
               children: [
-                const SizedBox(width: 30), 
-                const Expanded(child: 
-                  MenuCard(menuItem: "Real Time ECG", imageUrl: "assets/images/red_beat.png", routeUrl: EcgGraph()),
+                SizedBox(width: 30), 
+                Expanded(child: 
+                  MenuCard(menuItem: "Add Patient", imageUrl: "assets/images/ecg-beat.png",routeUrl:InsertPatientData(), // Use an anonymous function
+),
                 ),
 
-                const SizedBox(width: 30),              // Add some spacing between the containers
-                const Expanded(child: 
+                SizedBox(width: 30),        
+                      // Add some spacing between the containers
+                Expanded(child: 
+                  MenuCard(menuItem: "Patient Data", imageUrl: "assets/images/red_beat.png",routeUrl: FetchPatientData() ),
+                ),
+
+                SizedBox(width: 30), // Add some spacing between the containers
+
+              ],
+            ),
+
+                const SizedBox(height: 30), // Add some spacing between the containers
+
+             const Row(
+              children: [
+                SizedBox(width: 30), 
+                Expanded(child: 
+                  MenuCard(menuItem: "Real Time ECG", imageUrl: "assets/images/red_beat.png", routeUrl: FetchPatientData()),
+                ),
+
+                SizedBox(width: 30),              // Add some spacing between the containers
+                Expanded(child: 
                   MenuCard(menuItem: "Import ECG", imageUrl: "assets/images/import-ecg.png",routeUrl: FetchPatientData()),
                 ),
 
-                const SizedBox(width: 30), // Add some spacing between the containers
+                SizedBox(width: 30), // Add some spacing between the containers
+
 
               ],
             ),
@@ -87,23 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 30,
             ),
 
-            Row(
-              children: [
-                const SizedBox(width: 30), 
-                const Expanded(child: 
-                  MenuCard(menuItem: "Add Patient", imageUrl: "assets/images/ecg-beat.png",routeUrl:InsertPatientData(), // Use an anonymous function
-),
-                ),
-
-                const SizedBox(width: 30),              // Add some spacing between the containers
-                const Expanded(child: 
-                  MenuCard(menuItem: "Get Data", imageUrl: "assets/images/ecg-beat.png",routeUrl: FetchPatientData() ),
-                ),
-
-                const SizedBox(width: 30), // Add some spacing between the containers
-
-              ],
-            ),
+           
 /*
             MaterialButton(
               onPressed: () {

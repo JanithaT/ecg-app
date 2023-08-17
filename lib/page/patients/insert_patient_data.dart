@@ -1,5 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
+import '../../core/alert_utils.dart';
  
 class InsertPatientData extends StatefulWidget {
   const InsertPatientData({Key? key}) : super(key: key);
@@ -25,18 +27,20 @@ class _InsertPatientDataState extends State<InsertPatientData> {
     dbRef = FirebaseDatabase.instance.ref().child('Patients');
   }
  
- void _showSuccessDialog() {
+ void _showDialog(String type,String msg) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Success'),
-          content: Text('Patient data added successfully.'),
+          title: Text(type),
+          content: Text(msg),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _clearTextFields(); // Clear text fields after successful submission
+                if(type=="success"){
+                  _clearTextFields(); // Clear text fields after successful submission
+                }
               },
               child: Text('OK'),
             ),
@@ -56,7 +60,6 @@ class _InsertPatientDataState extends State<InsertPatientData> {
     if (patientNameController.text.trim().isEmpty ||
         patientAgeController.text.trim().isEmpty ||
         patientMobileController.text.trim().isEmpty) {
-      //_showErrorDialog('All fields are required.');
       return false;
     }
     return true;
@@ -126,15 +129,20 @@ class _InsertPatientDataState extends State<InsertPatientData> {
                 ),
                 MaterialButton(
                   onPressed: () {
-                    Map<String, String> patients = {
-                      'name': patientNameController.text,
-                      'age': patientAgeController.text,
-                      'mobile': patientMobileController.text
-                    };
-  
-  dbRef.push().set(patients).then((_) {
-                      _showSuccessDialog(); // Show success dialog
-                    }); 
+                     if (_validateFields()) {
+                      Map<String, String> patients = {
+                        'name': patientNameController.text,
+                        'age': patientAgeController.text,
+                        'mobile': patientMobileController.text,
+                      };
+
+                      dbRef.push().set(patients).then((_) {
+                        _showDialog("success","Patient Added Successfully"); // Show success dialog
+                      }); 
+                    }
+                    else{
+                      _showDialog("warn",'All fields are required.');
+                    }
                   },
                   child: const Text('Add Patient'),
                   color: Colors.blue,

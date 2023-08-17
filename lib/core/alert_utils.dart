@@ -183,7 +183,7 @@ mixin AlertUtils {
           actionButtonCallback: onActionPressed != null
               ? () => onActionPressed(context)
               : () {
-                  context.pop();
+               // Navigator.of(context).pop();
                 },
           actionButtonLabel: actionButtonLabel.isNotEmpty
               ? actionButtonLabel
@@ -195,7 +195,7 @@ mixin AlertUtils {
               : alertButtonType == AlertButtonType.ok
                   ? null
                   : () {
-                      context.router.pop();
+               // Navigator.of(context).pop();
                     },
           cancelButtonLabel: cancelButtonLabel.isNotEmpty
               ? cancelButtonLabel
