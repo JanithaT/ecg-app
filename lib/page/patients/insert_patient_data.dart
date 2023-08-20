@@ -32,6 +32,7 @@ class _InsertPatientDataState extends State<InsertPatientData> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          
           title: Text(type),
           content: Text(msg),
           actions: [

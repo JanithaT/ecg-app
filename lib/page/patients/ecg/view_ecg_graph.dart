@@ -31,7 +31,7 @@ class _ViewEcgGraphState extends State<ViewEcgGraph> {
       chartData.clear();
       if (data != null) {
         for (int i = 0; i < data.length; i++) {
-          chartData.add(LiveData(i, data[i] / 1000));
+          chartData.add(LiveData(i*3, data[i] / 1000));
         }
         setState(() {});
       }
@@ -53,7 +53,7 @@ void getpatientData() async {
         chartData.clear();
 
         for (int i = 0; i < lastEcgRecord.length; i++) {
-          chartData.add(LiveData(i, lastEcgRecord[i] / 1000));
+          chartData.add(LiveData(i*3, lastEcgRecord[i] / 1000));
         }
 
         setState(() {});

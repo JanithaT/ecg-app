@@ -16,7 +16,7 @@ class FetchPatientData extends StatefulWidget {
 }
  
 class _FetchPatientDataState extends State<FetchPatientData> {
-  
+  int ecgIndex=0;  
   Query dbRef = FirebaseDatabase.instance.ref().child('Patients');
   DatabaseReference reference = FirebaseDatabase.instance.ref().child('Patients');
   
@@ -64,7 +64,14 @@ class _FetchPatientDataState extends State<FetchPatientData> {
                   Column(children: [
                     MaterialButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => RealTimeEcgGraph(patientKey: patient['key'])));
+                         if(patient.containsKey('ecg')){
+                          ecgIndex=patient['ecg'].length;
+                         }
+                         else{
+                           ecgIndex=0;
+                         }
+                         
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => RealTimeEcgGraph(patientKey: patient['key'], ecgIndex:ecgIndex)));
                       },
                       child: const Text(
                         'Take ECG',                    

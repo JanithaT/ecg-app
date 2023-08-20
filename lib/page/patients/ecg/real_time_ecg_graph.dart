@@ -5,9 +5,12 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class RealTimeEcgGraph extends StatefulWidget {
-  const RealTimeEcgGraph({Key? key,required this.patientKey}) : super(key: key);
+  const RealTimeEcgGraph({Key? key,required this.patientKey, required this.ecgIndex}) : super(key: key);
 
   final String patientKey;
+  final int ecgIndex;
+
+
 
   @override
   State<RealTimeEcgGraph> createState() => _RealTimeEcgGraphState();
@@ -16,107 +19,146 @@ class RealTimeEcgGraph extends StatefulWidget {
 class _RealTimeEcgGraphState extends State<RealTimeEcgGraph> {
   late List<LiveData> chartData;
   late ChartSeriesController _chartSeriesController;
-  final DatabaseReference reference =
-      FirebaseDatabase.instance.reference().child('Patients').child('ecg');
+
   late DatabaseReference dbRefPatients;
   late DatabaseReference dbRefRealTimeECG;
+  late DatabaseReference dbRefPatientsECG;
 
+  String isBeginEcg = "false"; 
+  int lastEcgIndex =0;
+  bool iotConnect=false;
 
-  bool isBeginEcg = false; // Added boolean to track whether ECG has started
 
   @override
   void initState() {
-    dbRefPatients = FirebaseDatabase.instance.ref().child('Patients');
+    dbRefPatients = FirebaseDatabase.instance.ref().child('Patients').child(widget.patientKey);
     dbRefRealTimeECG = FirebaseDatabase.instance.ref().child('RealTimeECG');
 
     super.initState();
-    chartData = []; 
-    // Initialize with empty data
-    dbRefPatients.onValue.listen((event) {
-      final List<dynamic>? data = event.snapshot.value as List<dynamic>?;
+
+   dbRefRealTimeECG.onValue.listen((event) {
+  final Map<dynamic, dynamic>? snapshotValue = event.snapshot.value as Map<dynamic, dynamic>?;
+  if (snapshotValue != null) {
+    setState(() {
+      iotConnect = snapshotValue['isBeginEcg'] == 'true';
+    });
+  }
+});
+
+
+
+
+
+
+
+    chartData = [];
+    getRealtimeEcgData();
+dbRefPatients.onValue.listen((event) {
+      final dynamic data = event.snapshot.value;
       chartData.clear();
-      if (data != null) {
-        for (int i = 0; i < data.length; i++) {
-          chartData.add(LiveData(i, data[i] / 1000));
+      if (data != null && iotConnect) {
+        final List<dynamic>? ecgList = data['ecg'] as List<dynamic>?; // Use the conditional type check
+        if (ecgList != null) {
+          for (int i = 0; i < ecgList.length; i++) {
+            final Map<dynamic, dynamic>? ecgEntry = ecgList[widget.ecgIndex] as Map<dynamic, dynamic>?; // Use the conditional type check
+            if (ecgEntry != null && ecgEntry.containsKey('value')) {
+              final List<dynamic> ecgValues = ecgEntry['value'];
+              for (int j = 0; j < ecgValues.length; j++) {
+                chartData.add(LiveData(i * ecgValues.length + j, ecgValues[j] / 1000));
+                if (chartData.length > 1029) {
+                  chartData.removeAt(0);
+                }
+              }
+            }
+          }
+          setState(() {});
         }
-        setState(() {});
       }
     });
   }
 
+  // ... (rest of the class
+
+
   
   void startEcg() {
     setState(() {
-      isBeginEcg = true;
+      isBeginEcg = "true";
     });
     updateIsBeginEcg(isBeginEcg); // Update the value in the database
     getRealtimeEcgData();
   }
 
+  bool getIoTConnect(){
+    dbRefRealTimeECG = FirebaseDatabase.instance.ref().child('RealTimeECG').child('iotConnect');
+    return false;
+  }
+
   void stopEcg() {
     setState(() {
-      isBeginEcg = false;
+      isBeginEcg = "false";
     });
     updateIsBeginEcg(isBeginEcg); // Update the value in the database
   }
+Future<void> getRealtimeEcgData() async {
+    dbRefPatientsECG= FirebaseDatabase.instance.ref().child('Patients').child(widget.patientKey).child('ecg').child(widget.ecgIndex.toString());
+    
 
-void getRealtimeEcgData() async {
-  DatabaseReference patientRef = dbRefPatients.child(widget.patientKey);
-  DataSnapshot snapshot = await patientRef.get();
+     dbRefPatientsECG.onChildAdded.listen((event) {
+    DataSnapshot snapshot = event.snapshot;
+    if (snapshot.value != null && snapshot.value is Map) {
+      Map<dynamic, dynamic> ecgData = snapshot.value as Map<dynamic, dynamic>;
+      int time = ecgData['time'];
+      print("***********************"+time.toString()+"***************");
+      double speed = ecgData['speed'];
 
-  Map<dynamic, dynamic>? patient = snapshot.value as Map<dynamic, dynamic>?;
-
-  if (patient != null && patient.containsKey('ecg')) {
-    List<dynamic>? ecgData = patient['ecg'];
-
-    if (ecgData != null && ecgData.isNotEmpty) {
-      List<dynamic> lastEcgRecord = ecgData.last['value'];
-
-      if (lastEcgRecord != null && lastEcgRecord.isNotEmpty) {
-        chartData.clear();
-
-        for (int i = 0; i < lastEcgRecord.length; i++) {
-          chartData.add(LiveData(i, lastEcgRecord[i] / 1000));
-        }
-
-        setState(() {});
-      } else {
-        _showNoDataDialog();
-      }
-    } else {
-      _showNoDataDialog();
+      setState(() {
+        chartData.add(LiveData(time, speed));
+      });
     }
-  } else {
-    _showNoDataDialog();
-  }
+  });
+
+  dbRefPatientsECG.onChildRemoved.listen((event) {
+    setState(() {
+      chartData.clear();
+    });
+  });
 }
 
-void updateIsBeginEcg(bool value) {
+
+
+
+void updateIsBeginEcg(String value) {
   DatabaseReference realTimeEcgRef = dbRefRealTimeECG;
-  
+  print(DateFormat.yMMMd().format(DateTime.now()));
+
+   //currentDateTime = DateFormat.yMMMd().format(DateTime.now());
+
   // Update the isBeginEcg value in the database
   realTimeEcgRef.update({
     'patient_key':widget.patientKey,
     'isBeginEcg': value,
+    'ecgIndex':widget.ecgIndex,
+    'dateTime':DateFormat.yMd().add_jm().format(DateTime.now()).toString(),
   }).then((_) {
     print('isBeginEcg updated successfully.');
   }).catchError((error) {
     print('Failed to update isBeginEcg: $error');
   });
+  getRealtimeEcgData();
 }
 
-void _showNoDataDialog() {
+void _showNoDataDialog(String msg) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('No ECG Data'),
-        content: Text('There is no ECG data available for this patient.'),
+        content: Text(msg),
         actions: <Widget>[
           TextButton(
             child: Text('OK'),
             onPressed: () {
-              Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
           ),
@@ -128,7 +170,7 @@ void _showNoDataDialog() {
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {  
     // Set landscape orientation
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
@@ -155,8 +197,6 @@ void _showNoDataDialog() {
                   child: Text('Stop'),
                 ),
               ],
-            
-
             ),
             
             Expanded(
@@ -175,12 +215,12 @@ void _showNoDataDialog() {
           primaryXAxis: NumericAxis(
             majorGridLines: const MajorGridLines(width: 0),
             edgeLabelPlacement: EdgeLabelPlacement.none,
-            interval: 10,
+            interval: 100,
             title: AxisTitle(text: 'Time (Milli Seconds)'),
           ),
           primaryYAxis: NumericAxis(
             minimum: 0,
-            maximum: 4,
+            maximum: 4.5,
             axisLine: const AxisLine(width: 0),
             majorTickLines: const MajorTickLines(size: 0),
             interval: 1,
@@ -194,6 +234,7 @@ void _showNoDataDialog() {
     );
   }
 }
+
 
 class LiveData {
   LiveData(this.time, this.speed);
