@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_test_application_1/core/full_ecg_data.dart';
+import 'package:flutter_test_application_1/page/patients/ecg/real_time_prediction.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -18,7 +20,11 @@ class RealTimeEcgGraph extends StatefulWidget {
 
 class _RealTimeEcgGraphState extends State<RealTimeEcgGraph> {
   late List<LiveData> chartData;
+  List<LiveData> allIncomingEcgData = [];
+
   late ChartSeriesController _chartSeriesController;
+
+  late List<FullEcgData> ecgAllData=[];
 
   late DatabaseReference dbRefPatients;
   late DatabaseReference dbRefRealTimeECG;
@@ -27,94 +33,92 @@ class _RealTimeEcgGraphState extends State<RealTimeEcgGraph> {
   String isBeginEcg = "false"; 
   int lastEcgIndex =0;
   bool iotConnect=false;
-
+  int lastXValue = 0;
+  bool isIotStop=false;
 
   @override
   void initState() {
-    dbRefPatients = FirebaseDatabase.instance.ref().child('Patients').child(widget.patientKey);
+    dbRefPatients = FirebaseDatabase.instance.ref().child('Patients').child(widget.patientKey).child('ecg').child(widget.ecgIndex.toString());
     dbRefRealTimeECG = FirebaseDatabase.instance.ref().child('RealTimeECG');
 
     super.initState();
 
-   dbRefRealTimeECG.onValue.listen((event) {
-  final Map<dynamic, dynamic>? snapshotValue = event.snapshot.value as Map<dynamic, dynamic>?;
-  if (snapshotValue != null) {
-    setState(() {
-      iotConnect = snapshotValue['isBeginEcg'] == 'true';
+    dbRefRealTimeECG.onValue.listen((event) {
+      final Map<dynamic, dynamic>? snapshotValue = event.snapshot.value as Map<dynamic, dynamic>?;
+      if (snapshotValue != null) {
+        setState(() {
+          iotConnect = snapshotValue['iotConnect'] == true;
+          isBeginEcg = (snapshotValue['isBeginEcg'] == 'true') as String;
+        });
+      }
     });
-  }
-});
-
-
-
-
-
-
 
     chartData = [];
     getRealtimeEcgData();
-dbRefPatients.onValue.listen((event) {
+      
+    dbRefPatients.onValue.listen((event) {
       final dynamic data = event.snapshot.value;
-      chartData.clear();
+
       if (data != null && iotConnect) {
-        final List<dynamic>? ecgList = data['ecg'] as List<dynamic>?; // Use the conditional type check
-        if (ecgList != null) {
-          for (int i = 0; i < ecgList.length; i++) {
-            final Map<dynamic, dynamic>? ecgEntry = ecgList[widget.ecgIndex] as Map<dynamic, dynamic>?; // Use the conditional type check
-            if (ecgEntry != null && ecgEntry.containsKey('value')) {
-              final List<dynamic> ecgValues = ecgEntry['value'];
-              for (int j = 0; j < ecgValues.length; j++) {
-                chartData.add(LiveData(i * ecgValues.length + j, ecgValues[j] / 1000));
-                if (chartData.length > 1029) {
-                  chartData.removeAt(0);
-                }
-              }
-            }
+        final dynamic ecgData = data as Map<dynamic, dynamic>; // Update to 'ecgData'
+        final List<dynamic>? ecgValues = ecgData['value'] as List<dynamic>?; // Update to 'value'
+        if (ecgValues != null) {
+          for (int j = 0; j < ecgValues.length; j++) {
+            chartData.add(LiveData(lastXValue, ecgValues[j] / 1000));
+            lastXValue += 2;
+            ecgAllData.add(FullEcgData(lastXValue, ecgValues[j]*1.0));
+            
+            if (chartData.length > 1440) {
+              chartData.removeAt(0);
+            }        
+            
           }
           setState(() {});
         }
       }
-    });
-  }
-
-  // ... (rest of the class
-
-
-  
+    }
+  );
+}
+ 
   void startEcg() {
     setState(() {
       isBeginEcg = "true";
+      lastXValue = 0;
+      isIotStop=false;
+
     });
     updateIsBeginEcg(isBeginEcg); // Update the value in the database
-    getRealtimeEcgData();
-  }
-
-  bool getIoTConnect(){
-    dbRefRealTimeECG = FirebaseDatabase.instance.ref().child('RealTimeECG').child('iotConnect');
-    return false;
+    //getRealtimeEcgData();
   }
 
   void stopEcg() {
     setState(() {
       isBeginEcg = "false";
+      lastXValue = 0;
+      isIotStop=true;
     });
-    updateIsBeginEcg(isBeginEcg); // Update the value in the database
+    updateIsBeginEcg(isBeginEcg);
+    print(ecgAllData); // Update the value in the database
   }
+
 Future<void> getRealtimeEcgData() async {
     dbRefPatientsECG= FirebaseDatabase.instance.ref().child('Patients').child(widget.patientKey).child('ecg').child(widget.ecgIndex.toString());
-    
-
-     dbRefPatientsECG.onChildAdded.listen((event) {
+    dbRefPatientsECG.onChildAdded.listen((event) {
     DataSnapshot snapshot = event.snapshot;
     if (snapshot.value != null && snapshot.value is Map) {
       Map<dynamic, dynamic> ecgData = snapshot.value as Map<dynamic, dynamic>;
       int time = ecgData['time'];
-      print("***********************"+time.toString()+"***************");
       double speed = ecgData['speed'];
+        //LiveData newData = LiveData(time, speed);
+        //allIncomingEcgData.add(newData);
+        //print(allIncomingEcgData);
 
       setState(() {
         chartData.add(LiveData(time, speed));
-      });
+        lastXValue=  time;
+        ecgAllData.add(FullEcgData(time, speed));
+          print('Added data to ecgAllData: $ecgAllData'); // Add this line
+        });
     }
   });
 
@@ -128,13 +132,10 @@ Future<void> getRealtimeEcgData() async {
 
 
 
+
 void updateIsBeginEcg(String value) {
   DatabaseReference realTimeEcgRef = dbRefRealTimeECG;
-  print(DateFormat.yMMMd().format(DateTime.now()));
 
-   //currentDateTime = DateFormat.yMMMd().format(DateTime.now());
-
-  // Update the isBeginEcg value in the database
   realTimeEcgRef.update({
     'patient_key':widget.patientKey,
     'isBeginEcg': value,
@@ -170,69 +171,105 @@ void _showNoDataDialog(String msg) {
 
 
   @override
-  Widget build(BuildContext context) {  
-    // Set landscape orientation
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+Widget build(BuildContext context) {
+  // Set landscape orientation
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: Text('ECG Graph'), centerTitle: true),
-         body: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center, // Center buttons horizontally
-              children: [              
-                ElevatedButton(
-                  onPressed: startEcg,
-                  child: Text('Start'),
+  return SafeArea(
+    child: Scaffold(
+      appBar: AppBar(title: Text('ECG Graph'), centerTitle: true),
+      body: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: !iotConnect ? startEcg : null,
+                child: Text('Start'),
+              ),
+              SizedBox(
+                width: 15,
+              ),
+              ElevatedButton(
+                onPressed: iotConnect ? stopEcg : null,
+                child: Text('Stop'),
+              ),
+              SizedBox(
+                width: 15,
+              ),
+              MaterialButton(
+                  onPressed: isIotStop
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RealTimePrediction(
+                                patientKey: widget.patientKey,
+                                allIncomingEcgData: ecgAllData,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
+                  child: const Text('Go To Prediction'),
+                  color: Colors.blue,
+                  textColor: Colors.white,
+                  minWidth: 150,
+                  height: 40,
                 ),
-                SizedBox(
-                  width:15,
-                ),
-                ElevatedButton(
-                  onPressed: stopEcg,
-                  child: Text('Stop'),
-                ),
-              ],
+
+            ],
+          ),
+
+             
+          Visibility(
+            visible: !iotConnect,
+            child: Center(
+              child: Text('Press Start. Waiting for connect...'),
             ),
-            
+          ),
+          Visibility(
+            visible: iotConnect,
+            child:     
             Expanded(
               child: SfCartesianChart(
-          series: <SplineSeries<LiveData, int>>[
-            SplineSeries<LiveData, int>(
-              onRendererCreated: (ChartSeriesController controller) {
-                _chartSeriesController = controller;
-              },
-              dataSource: chartData,
-              color: const Color.fromRGBO(192, 108, 132, 1),
-              xValueMapper: (LiveData data, _) => data.time,
-              yValueMapper: (LiveData data, _) => data.speed,
-            )
-          ],
-          primaryXAxis: NumericAxis(
-            majorGridLines: const MajorGridLines(width: 0),
-            edgeLabelPlacement: EdgeLabelPlacement.none,
-            interval: 100,
-            title: AxisTitle(text: 'Time (Milli Seconds)'),
+                series: <SplineSeries<LiveData, int>>[
+                  SplineSeries<LiveData, int>(
+                    onRendererCreated: (ChartSeriesController controller) {
+                      _chartSeriesController = controller;
+                    },
+                    dataSource: chartData,
+                    color: const Color.fromRGBO(192, 108, 132, 1),
+                    xValueMapper: (LiveData data, _) => data.time,
+                    yValueMapper: (LiveData data, _) => data.speed,
+                  )
+                ],
+                primaryXAxis: NumericAxis(
+                  majorGridLines: const MajorGridLines(width: 0),
+                  edgeLabelPlacement: EdgeLabelPlacement.none,
+                  interval: 500,
+                  title: AxisTitle(text: 'Time (Milli Seconds)'),
+                ),
+                primaryYAxis: NumericAxis(
+                  minimum: 0,
+                  maximum: 4.5,
+                  axisLine: const AxisLine(width: 0),
+                  majorTickLines: const MajorTickLines(size: 0),
+                  interval: 1,
+                  title: AxisTitle(text: 'ECG (Mbps)'),
+                ),
+              ),
+            ),
           ),
-          primaryYAxis: NumericAxis(
-            minimum: 0,
-            maximum: 4.5,
-            axisLine: const AxisLine(width: 0),
-            majorTickLines: const MajorTickLines(size: 0),
-            interval: 1,
-            title: AxisTitle(text: 'ECG (Mbps)'),
-          ),
-        ),
+        ],
       ),
-          ],
-      ),
-      ),
-    );
-  }
+    ),
+  );
+}
+
 }
 
 
@@ -240,4 +277,6 @@ class LiveData {
   LiveData(this.time, this.speed);
   final int time;
   final double speed;
+
+  
 }

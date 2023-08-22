@@ -58,49 +58,6 @@ class MenuCard extends StatelessWidget {
           ),
         ),
     );
-
-
-
-/*
-    return Container(
-      decoration: CardDecorations.boxDecoration,
-      child: Padding(
-        padding: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              image: DecorationImage(
-                image: AssetImage(imageUrl),
-                fit: BoxFit.fill,
-              ),
-            ),
-          ),
-            Expanded(
-              child: Text(
-                menuItem,
-                textAlign: TextAlign.left,
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-menuItem,                
-),
-                Text(
-                  "ghjk",
-                )
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-
-    */
   }
 }
 

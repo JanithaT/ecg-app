@@ -44,7 +44,8 @@ class _UpdatePatientDataState extends State<UpdatePatientData> {
       appBar: AppBar(
         title: Text('Updating Record'),
       ),
-      body:  Center(
+      body:  SingleChildScrollView(child: 
+      Center(
         child: Padding(
           padding: EdgeInsets.all(8.0),
           child: Column(
@@ -123,6 +124,7 @@ class _UpdatePatientDataState extends State<UpdatePatientData> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

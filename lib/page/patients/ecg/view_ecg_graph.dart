@@ -31,7 +31,7 @@ class _ViewEcgGraphState extends State<ViewEcgGraph> {
       chartData.clear();
       if (data != null) {
         for (int i = 0; i < data.length; i++) {
-          chartData.add(LiveData(i*3, data[i] / 1000));
+          chartData.add(LiveData(i*2, data[i] / 1000));
         }
         setState(() {});
       }
@@ -53,7 +53,7 @@ void getpatientData() async {
         chartData.clear();
 
         for (int i = 0; i < lastEcgRecord.length; i++) {
-          chartData.add(LiveData(i*3, lastEcgRecord[i] / 1000));
+          chartData.add(LiveData(i*2, lastEcgRecord[i] / 1000));
         }
 
         setState(() {});
@@ -116,12 +116,12 @@ void _showNoDataDialog() {
           primaryXAxis: NumericAxis(
             majorGridLines: const MajorGridLines(width: 0),
             edgeLabelPlacement: EdgeLabelPlacement.none,
-            interval: 10,
+            interval: 500,
             title: AxisTitle(text: 'Time (Milli Seconds)'),
           ),
           primaryYAxis: NumericAxis(
             minimum: 0,
-            maximum: 4,
+            maximum: 4.5,
             axisLine: const AxisLine(width: 0),
             majorTickLines: const MajorTickLines(size: 0),
             interval: 1,
