@@ -36,6 +36,16 @@ class FirebaseApi {
       return null;
     }
   }
+
+  static Future<void> deleteFile(String path) async {
+    try {
+      final ref = FirebaseStorage.instance.refFromURL(path);
+      await ref.delete();
+    } catch (e) {
+      print("Error deleting file: $e");
+    }
+  }
+
 }
 
 class FileUploadState extends State<FileUpload> {
@@ -170,4 +180,7 @@ class FileUploadState extends State<FileUpload> {
       ),
     );
   }
+
+  
+
 }
