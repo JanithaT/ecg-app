@@ -7,7 +7,7 @@ import 'package:flutter_test_application_1/page/patients/insert_patient_data.dar
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:async';
 import 'dart:math' as math;
-
+import 'Testing_Files/File_Screen.dart';
 import '../widget/menu_card.dart';
 import 'patients/ecg/real_time_ecg_graph.dart';
 
@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 SizedBox(width: 30),              // Add some spacing between the containers
                 Expanded(child: 
-                  MenuCard(menuItem: "Import ECG", imageUrl: "assets/images/import-ecg.png",routeUrl: FetchPatientData()),
+                  MenuCard(menuItem: "Import ECG", imageUrl: "assets/images/import-ecg.png",routeUrl: FileScreen()),
                 ),
 
                 SizedBox(width: 30), // Add some spacing between the containers
