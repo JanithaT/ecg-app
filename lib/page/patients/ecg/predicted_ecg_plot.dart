@@ -24,7 +24,7 @@ class PredictedEcgPlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int indexFor10Percent = (signals.length * 0.10).toInt();
+    final int indexFor10Percent = (signals.length * 0.25).toInt();
 List<CombinedData> combinedDataList = List.generate(
       signals.length,
       (index) => CombinedData(
@@ -84,6 +84,8 @@ List<CombinedData> combinedDataList = List.generate(
           ),
         ],
 ),
+
+
 
         ],
       ),

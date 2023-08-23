@@ -53,6 +53,9 @@ flutter:
     - assets/images/ecg-beat.png
     - assets/images/red_beat.png
     - assets/images/import-ecg.png
+    - assets/images/patient-add.png
+    - assets/images/patient-report.png
+
     - assets/label.txt
     - assets/transformer_model.tflite
 

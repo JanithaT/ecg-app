@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test_application_1/core/ecg_plot/ecg_plot.dart';
 import 'package:flutter_test_application_1/core/ecg_plot/feature_plot.dart';
 import 'package:flutter_test_application_1/page/patients/ecg/predicted_ecg_plot.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 import '../../../core/ecg_plot/pie_chart_helper.dart';
@@ -201,69 +200,26 @@ Future<void> predictAndDisplayPieChart() async {
     predictions.add(prediction);
   }
 
-  print("**********Predictions************");
-    print(predictions);
-    print("**********Labels************");
-    print(_labels);
-
 
   List<PieChartSectionData> pieChartData = PieChartHelper.generatePieChartData(predictions, _labels);
-
- /* PredictedEcgPlot(
-    signals:zScores, 
-    highPointIndices: highPointIndices, 
-    labels: _labels, 
-    max: 6,
-    min:-2, 
-    predictionsValue:predictions
-  );*/
 
   setState(() {
     this.pieChartData = pieChartData;
     this.predictions=predictions;
       isChartVisible = true; // Show the pie chart
     isPredictedEcgVisible = true; // Show the predicted ECG graph
-   // this.ecgPlots = ecgPlots;
-
   });
 }
 
-/*
-Future<void> predictAndDisplayEcgPlots(List<int>predictions,List<String> labels) async {
-    if (highPointIndices.isEmpty) {
-      return;
-    }
-
-
-    for (int index = 0; index < highPointIndices.length; index++) {
-      int prediction = predictedCategories[index];
-      String predictionLabel = _labels[prediction];
-
-      PredictedEcgPlot ecgPlot = PredictedEcgPlot(
-        signals: reshapedZScores,
-        predictionLabel: predictionLabel,
-        min: -2,
-        max: 6, 
-        highPointIndices: highPointIndices,
-      );
-
-      ecgPlots.add(ecgPlot);
-    }
-
-    setState(() {
-      this.ecgPlots = ecgPlots;
-    });
-  }
-*/
-
 @override
 Widget build(BuildContext context) {
-  return MaterialApp(
-    home: Scaffold(
+  return  SafeArea(child: 
+    Scaffold(
       appBar: AppBar(
         title: Text('ECG Results'), centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body:
+      SingleChildScrollView(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -384,6 +340,7 @@ Widget build(BuildContext context) {
         ),
       ),
     ),
+    
   );
 }
 

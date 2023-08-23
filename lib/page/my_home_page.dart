@@ -25,11 +25,12 @@ class _MyHomePageState extends State<MyHomePage> {
   
   @override
   Widget build(BuildContext context) {
+    /*
     SystemChrome.setPreferredOrientations([
        DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
-
+*/
      return SafeArea(
       child: Scaffold(
         appBar: AppBar(title: Text(MyApp.title), centerTitle: true),
@@ -42,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 30,
             ),
             const Text(
-              'Realtime ECG Visualization and Analysis',
+              'CardiaSync IoT Monitor',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w500,
@@ -71,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 SizedBox(width: 30), 
                 Expanded(child: 
-                  MenuCard(menuItem: "Add Patient", imageUrl: "assets/images/ecg-beat.png",routeUrl:InsertPatientData(), // Use an anonymous function
+                  MenuCard(menuItem: "Add Patient", imageUrl: "assets/images/patient-add.png",routeUrl:InsertPatientData(), // Use an anonymous function
 ),
                 ),
 
@@ -90,14 +91,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
              const Row(
               children: [
-                SizedBox(width: 30), 
-                Expanded(child: 
-                  MenuCard(menuItem: "Real Time ECG", imageUrl: "assets/images/red_beat.png", routeUrl: FetchPatientData()),
-                ),
-
                 SizedBox(width: 30),              // Add some spacing between the containers
                 Expanded(child: 
                   MenuCard(menuItem: "Import ECG", imageUrl: "assets/images/import-ecg.png",routeUrl: FileScreen()),
+                ),
+                 SizedBox(width: 30), 
+                Expanded(child: 
+                  MenuCard(menuItem: "Analysis Report", imageUrl: "assets/images/patient-report.png", routeUrl: FetchPatientData()),
                 ),
 
                 SizedBox(width: 30), // Add some spacing between the containers

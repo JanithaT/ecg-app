@@ -14,7 +14,7 @@ class EcgPlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int indexFor10Percent = (signals.length * 0.10).toInt();
+    final int indexFor10Percent = (signals.length * 0.25).toInt();
 
     return Container(
       height: 300,
