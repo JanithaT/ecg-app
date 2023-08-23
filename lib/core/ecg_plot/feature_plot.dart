@@ -23,8 +23,9 @@ class FeaturePlot extends StatelessWidget {
           titlesData: FlTitlesData(show: false),
           borderData: FlBorderData(show: false),
           minX: 0,
-          maxX: reshapedData[0].length.toDouble() - 1,
-          minY: min,
+maxX: reshapedData.isNotEmpty && reshapedData[0].isNotEmpty
+    ? reshapedData[0].length.toDouble() - 1
+    : 0,          minY: min,
           maxY: max,
           lineBarsData: [
             for (int i = 0; i < reshapedData.length; i++)

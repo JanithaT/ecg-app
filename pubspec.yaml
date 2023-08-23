@@ -35,6 +35,8 @@ dependencies:
   http: ^1.1.0
   pdf: ^3.10.4
   permission_handler: ^10.4.3
+  screenshot: ^2.1.0
+  printing: ^5.11.0
 
 
 dev_dependencies:

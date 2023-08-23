@@ -48,7 +48,7 @@ class _RealTimeEcgGraphState extends State<RealTimeEcgGraph> {
       if (snapshotValue != null) {
         setState(() {
           iotConnect = snapshotValue['iotConnect'] == true;
-          isBeginEcg = (snapshotValue['isBeginEcg'] == 'true') as String;
+          isBeginEcg = (snapshotValue['isBeginEcg'] == "true") as String;
         });
       }
     });

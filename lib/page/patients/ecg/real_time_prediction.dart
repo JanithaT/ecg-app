@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test_application_1/core/ecg_plot/ecg_plot.dart';
 import 'package:flutter_test_application_1/core/ecg_plot/feature_plot.dart';
+import 'package:flutter_test_application_1/page/patients/ecg/predicted_ecg_plot.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
+import '../../../core/ecg_plot/pie_chart_helper.dart';
 import '../../../core/full_ecg_data.dart';
 
 class RealTimePrediction extends StatefulWidget {
@@ -26,11 +28,21 @@ class _RealTimePredictionState extends State<RealTimePrediction> {
 
    List<double> denoisedSignals = [];
   List<double> zScores = [];
-  List<PieChartSectionData> pieChartData = [];
   int windowSize = 180; 
   List<List<double>> reshapedZScores = [];
   late Interpreter _interpreter;
   List<String> _labels = [];
+
+  List<int> predictedCategories = [];
+  late List<int> highPointIndices=[];
+  List<PieChartSectionData> pieChartData = [];
+
+  List<PredictedEcgPlot> ecgPlots = [];
+  late List<int> predictions = [];
+
+  bool isChartVisible = false;
+bool isPredictedEcgVisible = false;
+
 
 
   @override
@@ -52,19 +64,6 @@ class _RealTimePredictionState extends State<RealTimePrediction> {
     
     reshapedZScores = reshapeZScores(zScores,  360);
 
-
-    setState(() {});
-    print("********** signals ************");
-    print(signals.length);  
-
-    print("********** Reshaped row ************");
-    print(reshapedZScores.length);
-    
-    print("********** reshaped zscore column ************");        
-    print(reshapedZScores[0].length);
-
-
-   
     }
  
 
@@ -117,6 +116,10 @@ class _RealTimePredictionState extends State<RealTimePrediction> {
       zScores.add(zScore);
     }
 
+    setState(() {
+      this.zScores = zScores;
+    });
+
     return zScores;
   }
 
@@ -124,7 +127,6 @@ class _RealTimePredictionState extends State<RealTimePrediction> {
   List<List<double>> reshapedData = [];
   double threshold = 3.0; // You can adjust this threshold as needed
 
-  List<int> highPointIndices = [];
   for (int i = 1; i < zScores.length - 1; i++) {
     if (zScores[i] > threshold &&
         zScores[i] > zScores[i - 1] &&
@@ -157,6 +159,11 @@ class _RealTimePredictionState extends State<RealTimePrediction> {
     reshapedData.add(rowData);
   }
 
+  
+  setState(() {
+      this.highPointIndices = highPointIndices;
+    });
+
   return reshapedData;
 }
 
@@ -167,6 +174,7 @@ Future<void> loadTFLiteModel() async {
 
   String labels = await rootBundle.loadString('assets/label.txt');
   _labels = labels.split('\n');
+  print(_labels);
 }
 
 
@@ -188,94 +196,188 @@ Future<void> predictAndDisplayPieChart() async {
     outputData.addAll(reshapedOutput);
   }
 
-  List<int> predictions = [];
   for (var output in outputData) {
     int prediction = output.indexOf(output.reduce((max)));
     predictions.add(prediction);
   }
 
-  Map<int, int> classCounts = Map();
-    for (var prediction in predictions) {
-     classCounts[prediction] = (classCounts[prediction] ?? 0) + 1;
-  }
+  print("**********Predictions************");
+    print(predictions);
+    print("**********Labels************");
+    print(_labels);
 
-  print(predictions);
 
-    // Create pie chart data
-    List<PieChartSectionData> pieChartData = [];
+  List<PieChartSectionData> pieChartData = PieChartHelper.generatePieChartData(predictions, _labels);
 
-      List<Color> predefinedColors = [
-      Colors.blue,
-      Colors.red,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-    ];
+ /* PredictedEcgPlot(
+    signals:zScores, 
+    highPointIndices: highPointIndices, 
+    labels: _labels, 
+    max: 6,
+    min:-2, 
+    predictionsValue:predictions
+  );*/
 
-    classCounts.forEach((classIndex, count) {
-      pieChartData.add(PieChartSectionData(
-        value: count.toDouble(),
-        title: '${_labels[classIndex]}: $count',
-        color: predefinedColors[classIndex % predefinedColors.length],
-      ));
-    });
+  setState(() {
+    this.pieChartData = pieChartData;
+    this.predictions=predictions;
+      isChartVisible = true; // Show the pie chart
+    isPredictedEcgVisible = true; // Show the predicted ECG graph
+   // this.ecgPlots = ecgPlots;
+
+  });
+}
+
+/*
+Future<void> predictAndDisplayEcgPlots(List<int>predictions,List<String> labels) async {
+    if (highPointIndices.isEmpty) {
+      return;
+    }
+
+
+    for (int index = 0; index < highPointIndices.length; index++) {
+      int prediction = predictedCategories[index];
+      String predictionLabel = _labels[prediction];
+
+      PredictedEcgPlot ecgPlot = PredictedEcgPlot(
+        signals: reshapedZScores,
+        predictionLabel: predictionLabel,
+        min: -2,
+        max: 6, 
+        highPointIndices: highPointIndices,
+      );
+
+      ecgPlots.add(ecgPlot);
+    }
 
     setState(() {
-      this.pieChartData = pieChartData;
+      this.ecgPlots = ecgPlots;
     });
   }
+*/
 
 @override
 Widget build(BuildContext context) {
-
   return MaterialApp(
     home: Scaffold(
-      appBar: AppBar(title: Text('CSV Processing')),
+      appBar: AppBar(
+        title: Text('ECG Results'), centerTitle: true,
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              SizedBox(height: 20),
+
+              // Real ECG Graph
+              Text(
+                'Real ECG Graph',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 5),
+              EcgPlot(signals: signals, min: 0, max: 4500),
+
+              // ECG Graph after Denoised
+              Text(
+                'ECG Graph after Denoising',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 5),
+              EcgPlot(signals: denoisedSignals, min: 0, max: 4000),
+
+              // ECG Graph Z score normalization
+              Text(
+                'ECG Graph after Z-score Normalization',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 5),
+              EcgPlot(signals: zScores, min: -2, max: 7),
+
+              // Feature Extraction
+              Text(
+                'Feature Extraction',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              FeaturePlot(reshapedData: reshapedZScores, min: -2, max: 8),
+
+              SizedBox(height: 20),
+
+              Text(
+                'Final Prediction Result',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red[900],
+                ),
+              ),
+              SizedBox(height: 5),
+
+              // Prediction Button
               SizedBox(height: 10),
               ElevatedButton(
                 onPressed: predictAndDisplayPieChart,
-                child: Text('Process Classification and Display Pie Chart'),
+                child: Text('Get Prediction Result'),
               ),
-              SizedBox(height: 20),
 
+              SizedBox(height: 30),
 
-              Text('Real ECG Graph'),              
-              SizedBox(height: 5),                    
-              EcgPlot(signals: signals, min:0,max:4500),
+              // Predicted ECG Plot and Pie Chart (if visible)
+              if (isChartVisible)
+                Column(
+                  children: [
 
-              Text('ECG Graph after Deniosed'),              
-              SizedBox(height: 5),             
-              EcgPlot(signals: denoisedSignals, min:0,max:4500),
+                    // Predicted ECG Plot
+                    if (isPredictedEcgVisible)
+                      PredictedEcgPlot(
+                        signals: zScores,
+                        highPointIndices: highPointIndices,
+                        max: 7,
+                        min: -2,
+                        predictionsValue: predictions,
+                      ),
 
-              Text('ECG Graph Z score normalization'),              
-              SizedBox(height: 5),             
-              EcgPlot(signals: zScores, min:-2,max:6),
+                    SizedBox(height: 20),
+                    
+                    Text(
+                      "Total Number of beat : "+highPointIndices.length.toString(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 53, 47, 47),
+                      ),
+                    ),
 
-              Text('Fearure Extraction'),              
-              SizedBox(height: 5),             
-              FeaturePlot(reshapedData: reshapedZScores, min:-2,max:6),
+                    SizedBox(height: 20),
 
-              SizedBox(height: 20),
+                    // Pie Chart displaying classification results
+                    AspectRatio(
+                      aspectRatio: 2.5,
+                      child: PieChart(
+                        PieChartData(
+                          sections: pieChartData,
+                        ),
+                      ),
+                    ),
 
-              // PieChart displaying classification results
-              AspectRatio(
-                aspectRatio: 3.0,
-                child: PieChart(
-                  PieChartData(
-                    sections: pieChartData,
-                  ),
-                ),
-              ),
-              if (pieChartData.isNotEmpty)
-                PieChart(
-                  PieChartData(
-                    sections: pieChartData,
-                  ),
+                   
+              SizedBox(height: 5),
+
+                    SizedBox(height: 40),
+                  ],
                 ),
             ],
           ),
@@ -284,6 +386,7 @@ Widget build(BuildContext context) {
     ),
   );
 }
+
 
 
 }

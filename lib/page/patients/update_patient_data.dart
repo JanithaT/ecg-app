@@ -42,7 +42,7 @@ class _UpdatePatientDataState extends State<UpdatePatientData> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Updating Record'),
+        title: Text('Updating Record'), centerTitle: true,
       ),
       body:  SingleChildScrollView(child: 
       Center(

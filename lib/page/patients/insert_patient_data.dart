@@ -1,7 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
-import '../../core/alert_utils.dart';
  
 class InsertPatientData extends StatefulWidget {
   const InsertPatientData({Key? key}) : super(key: key);
@@ -70,7 +68,7 @@ class _InsertPatientDataState extends State<InsertPatientData> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Patient'),
+        title: Text('Add Patient'), centerTitle: true,
       ),
       body: SingleChildScrollView(child: 
         Center(

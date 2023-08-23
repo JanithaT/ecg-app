@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test_application_1/page/patients/ecg/real_time_prediction.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class EcgPlot extends StatelessWidget {
   const EcgPlot({
-    required this.signals, required this.min, required this.max,
-
+    required this.signals,
+    required this.min,
+    required this.max,
   });
 
   final List<double> signals;
@@ -52,4 +52,11 @@ class EcgPlot extends StatelessWidget {
       ),
     );
   }
+}
+
+class ChartSampleData {
+  final double x;
+  final double y;
+
+  ChartSampleData({required this.x, required this.y});
 }

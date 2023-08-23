@@ -100,7 +100,7 @@ void _showNoDataDialog() {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text('ECG Graph'), centerTitle: true),
+        appBar: AppBar(title: Text('Last ECG Graph'), centerTitle: true),
         body: SfCartesianChart(
           series: <SplineSeries<LiveData, int>>[
             SplineSeries<LiveData, int>(

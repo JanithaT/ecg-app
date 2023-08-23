@@ -181,7 +181,7 @@ class _FetchPatientDataState extends State<FetchPatientData> {
     return SafeArea(child: 
     Scaffold(
       appBar: AppBar(
-        title: const Text('Get data'),
+        title: const Text('Patients Details'), centerTitle: true,
       ),
       body: 
       Container(
