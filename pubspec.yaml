@@ -56,6 +56,13 @@ flutter:
     - assets/images/patient-add.png
     - assets/images/patient-report.png
 
+    - assets/images/logo2.png
+    - assets/images/logo3.png
+    - assets/images/logo4.png
+    - assets/images/logo.svg
+
+
+
     - assets/label.txt
     - assets/transformer_model.tflite
 
