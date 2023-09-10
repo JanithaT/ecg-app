@@ -1,16 +1,49 @@
-# flutter_test_application_1
+# ECG Monitoring System using Flutter
 
-A new Flutter project.
+## Overview
 
-## Getting Started
+This mobile application is designed to monitor and visualize ECG (Electrocardiogram) data. It connects to a Firebase database for data storage and communicates with an IoT device to collect ECG readings. The application provides real-time monitoring and visualization of ECG data, and also predict the arrthmia category using deep learning model.
 
-This project is a starting point for a Flutter application.
+## Purpose
+Research - Cost-Effective ECG Machine Synchronized to Mobile Phone for Data Display and Analysis 
 
-A few resources to get you started if this is your first Flutter project:
+## Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Cross-platform mobile app developed with Flutter.
+- Integration with Firebase for real-time data storage.
+- Communication with an IoT device for ECG data collection.
+- Real-time monitoring and visualization of ECG data.
+- Data analytics using deep learning model.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Requirements
+
+- Flutter SDK [Link](https://flutter.dev/docs/get-started/install)
+- Firebase account for database setup [Link](https://firebase.google.com/)
+- IoT device for ECG data collection.
+- Android or iOS device for testing the app.
+
+## Installation
+
+1. Clone the repository: `git clone [repository_url]`
+2. Navigate to the project directory: `cd [project_directory]`
+3. Install dependencies: `flutter pub get`
+
+## Usage
+
+1. Configure Firebase:
+   - Create a Firebase project and set up a Realtime Database.
+   - Update the Firebase configuration in the app (location: `lib/firebase/firebase_config.dart`).
+   
+2. Set up IoT Device:
+   - Connect your IoT device to the app using the appropriate communication method (Wi-Fi).
+   - Ensure the IoT device is sending ECG data to the app.
+
+3. Run the app:
+   - Connect your Android/iOS device or use an emulator.
+   - Run the app using `flutter run`.
+
+4. Explore the ECG monitoring features:
+   - Add patient & Monitor real-time ECG data.
+   - Predict the arrythmia category
+
+
